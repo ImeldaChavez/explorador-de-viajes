@@ -53,6 +53,12 @@ El proyecto permitirá:
 
 La aplicación utiliza una sola página HTML y divide progresivamente la lógica JavaScript en módulos según su responsabilidad.
 
+Actualmente la aplicación separa: 
+-Comunicación con APIs.
+-Coordinación principal.
+-Renderizado de la interfaz.
+-Búsqueda, filtrado y ordenamiento de información.
+
 ## Versión actual
 
-v0.3.0 - Renderizado dinamico de países/destinos.
+v0.4.0 - Búsqueda, filtrado y ordenamiento dinámico de destinos.
