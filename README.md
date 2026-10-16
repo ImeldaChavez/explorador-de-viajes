@@ -2,7 +2,7 @@
 
 Proyecto integrador desarrollado con JavaScript, APIs y librerías para explorar información de países y destinos alrededor del mundo.
 
-## Tecnologías 
+## Tecnologías
 
 ## Tecnologías
 
@@ -30,6 +30,7 @@ El proyecto permitirá:
 -Persistir favoritos mediante LocalStorage.
 
 ## countriesApi.js
+
 -fetch()
 -async / await
 -try / catch
@@ -37,14 +38,13 @@ El proyecto permitirá:
 -response.json()
 -import / export
 
-
 ## ui.js
 
 -map()
 -template literals
 -innerHTML
 -optional chaining
--data-*
+-data-\*
 -DOM dinámico
 -módulos JavaScript
 -separación de responsabilidades
@@ -53,7 +53,7 @@ El proyecto permitirá:
 
 La aplicación utiliza una sola página HTML y divide progresivamente la lógica JavaScript en módulos según su responsabilidad.
 
-Actualmente la aplicación separa: 
+Actualmente la aplicación separa:
 -Comunicación con APIs.
 -Coordinación principal.
 -Renderizado de la interfaz.
@@ -61,4 +61,4 @@ Actualmente la aplicación separa:
 
 ## Versión actual
 
-v0.4.0 - Búsqueda, filtrado y ordenamiento dinámico de destinos.
+v0.5.0 - Detalle dinámico de destinos e integración de mapas con Leaflet en el botón ver más.
