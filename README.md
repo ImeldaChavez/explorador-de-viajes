@@ -28,6 +28,10 @@ El proyecto permitirá:
 -Visualizar la ubicación del destino en un mapa.
 -Guardar destinos favoritos.
 -Persistir favoritos mediante LocalStorage.
+-Favoritos
+-LocalStorage
+-SweetAlert2
+-Vista dinámica Explorar/Favoritos
 
 ## countriesApi.js
 
