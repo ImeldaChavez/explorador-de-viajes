@@ -61,4 +61,4 @@ Actualmente la aplicación separa:
 
 ## Versión actual
 
-v0.5.0 - Detalle dinámico de destinos e integración de mapas con Leaflet en el botón ver más.
+v0.6.0 - Favoritos persistentes con LocalStorage e integración de SweetAlert2.

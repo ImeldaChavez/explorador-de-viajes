@@ -46,13 +46,35 @@ export function mostrarError(contenedor) {
         `;
 }
 
+//Mostrar favoritos vacios
+export function mostrarFavoritosVacios(contenedor) {
+	contenedor.innerHTML = /*html */ `
+        <div class="col-span-full bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center">
+
+            <div class="text-5xl mb-4">
+                ♡
+            </div>
+
+            <h3 class="text-xl font-semibold text-slate-800 mb-2">
+                No tienes destinos favoritos
+            </h3>
+
+            <p class="text-slate-500">
+                Explora los destinos y guarda
+                los que más te interesen.
+            </p>
+
+        </div>
+    `;
+}
+
 //Actualizar el contador
 export function actualizarContador(total, elementoContador) {
 	//Mensaje de actualización de contador
 	elementoContador.textContent = `${total} destinos`;
 }
 
-export function renderPaises(paises, contenedor) {
+export function renderPaises(paises, contenedor, modo = "explorar") {
 	if (paises.length === 0) {
 		contenedor.innerHTML = /*html */ `
         <div class="col-span-full bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center">
@@ -96,6 +118,19 @@ export function renderPaises(paises, contenedor) {
 			const codigo = pais.codes?.alpha_3 ?? "";
 
 			const poblacionFormateada = poblacion.toLocaleString("es-MX");
+
+			const botonFavorito =
+				modo === "favoritos"
+					? /*html */ `
+                <button type="button" data-action="remove-favorite" data-country-code="${codigo}" class="px-4 py-2 border border-red-300 text-red-600 rounded-lg cursor-pointer hover:bg-red-50 transition">
+                    ♥ Eliminar
+                </button> `
+					: /*html */ `
+                
+                <button type="button" data-action="favorite" data-country-code="${codigo}" aria-label="Agregar ${nombre} a favoritos"
+                    class=" px-4 py-2 border border-slate-300 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 transition">
+                    ♡
+                </button> `;
 
 			return /*html */ `
             <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition">
@@ -158,15 +193,7 @@ export function renderPaises(paises, contenedor) {
                     Ver más
                 </button>
 
-
-                <button
-                    type="button"
-                    data-action="favorite"
-                    data-country-code="${codigo}"
-                    aria-label="Agregar ${nombre} a favoritos"
-                    class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 transition">
-                    ♡
-                </button>
+                ${botonFavorito}
 
             </div>
 
@@ -190,7 +217,7 @@ export function mostrarDetalle(pais, modal, modalContent) {
 
 	const subregion = pais.subregion ?? "Subregión no disponible";
 
-	const poblacion = pais.poblacion ?? 0;
+	const poblacion = pais.population ?? 0;
 
 	const bandera = pais.flag?.url_png ?? "";
 

@@ -9,12 +9,20 @@ import {
 	actualizarContador,
 	mostrarDetalle,
 	cerrarDetalle,
+	mostrarFavoritosVacios,
 } from "./ui/ui.js";
 import { procesarPaises } from "./utils/filters.js";
 import { crearMapa, destruirMapa } from "./ui/mapUI.js";
+import {
+	obtenerFavoritos,
+	agregarFavorito,
+	eliminarFavoritos,
+	esFavorito,
+} from "./services/favoritesService.js";
 
 //Estado de aplicación
 let paises = [];
+let vistaActual = "explorar";
 
 //Referencias del DOM
 const destinarioContainer = document.querySelector("#destinations-container");
@@ -28,6 +36,14 @@ const sortFilter = document.querySelector("#sort-filter");
 const detailModal = document.querySelector("#detail-modal");
 const detailModalContent = document.querySelector("#detail-modal-content");
 
+const btnExplorar = document.querySelector("#button-explorer");
+
+const btnFavoritos = document.querySelector("#button-favorites");
+
+const sectionTitle = document.querySelector("#section-title");
+
+const searchForm = document.querySelector("#search-form");
+
 //Cerrar modal
 function cerrarModalDetalle() {
 	destruirMapa();
@@ -37,6 +53,71 @@ function cerrarModalDetalle() {
 //Buscar pais por codigo
 function obtenerPaisPorCodigo(codigo) {
 	return paises.find((pais) => pais.codes?.alpha_3 === codigo);
+}
+
+//Actualizar navegación
+function actualizarNavegacion() {
+	//const clasesActivas = ["bg-blue-600", "text-white"];
+
+	//const clasesInactivas = [
+	//	"bg-white",
+	//	"text-slate-700",
+	//	"border",
+	//	"border-slate-300",
+	//];
+
+	if (vistaActual === "explorar") {
+		btnExplorar.className = `
+        px-4
+        py-2
+        bg-blue-600
+        text-white
+        rounded-lg
+        font-medium
+        cursor-pointer
+        hover:bg-blue-700
+        transition
+    `;
+
+		btnFavoritos.className = `
+        px-4
+        py-2
+        bg-white
+        text-slate-700
+        border
+        border-slate-300
+        rounded-lg
+        font-medium
+        cursor-pointer
+        hover:bg-slate-100
+        transition
+    `;
+	} else {
+		btnExplorar.className = `
+        px-4
+        py-2
+        bg-white
+        text-slate-700
+        border
+        border-slate-300
+        rounded-lg
+        font-medium
+        cursor-pointer
+        hover:bg-slate-100
+        transition
+    `;
+
+		btnFavoritos.className = `
+        px-4
+        py-2
+        bg-blue-600
+        text-white
+        rounded-lg
+        font-medium
+        cursor-pointer
+        hover:bg-blue-700
+        transition`;
+	}
 }
 
 //Abrir detalle
@@ -57,6 +138,10 @@ function abrirDetalle(codigo) {
 
 //Aplicar filtros
 function aplicarFiltros() {
+	if (vistaActual !== "explorar") {
+		return;
+	}
+
 	//Valores de los inputs
 	const texto = searchInput.value;
 	const continente = continentFilter.value;
@@ -71,8 +156,116 @@ function aplicarFiltros() {
 	actualizarContador(resultado.length, resultCount);
 }
 
+//Mostrar vista explorar
+function mostrarExplorar() {
+	vistaActual = "explorar";
+
+	sectionTitle.textContent = "Destinos";
+
+	searchForm.classList.remove("hidden");
+
+	actualizarNavegacion();
+
+	aplicarFiltros();
+}
+
+//Mostrar favoritos
+function mostrarFavoritos() {
+	vistaActual = "favoritos";
+
+	sectionTitle.textContent = "Mis favoritos";
+
+	searchForm.classList.add("hidden");
+
+	actualizarNavegacion();
+
+	const favoritos = obtenerFavoritos();
+
+	if (favoritos.length === 0) {
+		mostrarFavoritosVacios(destinarioContainer);
+
+		actualizarContador(0, resultCount);
+
+		return;
+	}
+
+	renderPaises(favoritos, destinarioContainer, "favoritos");
+
+	actualizarContador(favoritos.length, resultCount);
+}
+
+//Eliminar destino/pais de favoritos
+async function manejarEliminarFavoritos(codigo) {
+	const pais = obtenerPaisPorCodigo(codigo);
+
+	if (!pais) {
+		return;
+	}
+
+	const resultado = await Swal.fire({
+		icon: "warning",
+		title: "Eliminar favorito",
+		text: `¿Deseas eliminar ${pais.names?.common ?? "este destino"} de tus favoritos?`,
+		showCancelButton: true,
+		confirmButtonText: "Eliminar",
+		cancelButtonText: "Cancelar",
+		confirmButtonColor: "#dc2626",
+	});
+
+	if (!resultado.isConfirmed) {
+		return;
+	}
+
+	eliminarFavoritos(codigo);
+
+	mostrarFavoritos();
+
+	Swal.fire({
+		icon: "success",
+		title: "Favorito eliminado",
+		timer: 1500,
+		showConfirmButton: false,
+	});
+}
+
+//Agregar pais/destino a favoritos
+function manejarAgregarFavorito(codigo) {
+	const pais = obtenerPaisPorCodigo(codigo);
+
+	if (!pais) {
+		return;
+	}
+
+	if (esFavorito(codigo)) {
+		Swal.fire({
+			icon: "info",
+			title: "Ya está en favoritos",
+			text: "Este destino ya había sido guardado.",
+		});
+
+		return;
+	}
+
+	const agregado = agregarFavorito(pais);
+
+	if (agregado) {
+		Swal.fire({
+			icon: "success",
+			title: "Destino guardado",
+			text: `${pais.names?.common ?? "El destino"} fue agregado a favoritos.`,
+			timer: 1800,
+			showConfirmButton: false,
+		});
+	}
+}
+
 //Registrar eventos para aplicar los filtros
 function registrarEventos() {
+	//Por si el usuario presiona Enter accidentalmente
+	searchForm.addEventListener("submit", (event) => {
+		event.preventDefault();
+	});
+
 	//Buscar por pais
 	searchInput.addEventListener("input", aplicarFiltros);
 
@@ -81,6 +274,12 @@ function registrarEventos() {
 
 	//Ordenar paises
 	sortFilter.addEventListener("change", aplicarFiltros);
+
+	//Navegación - Explorar
+	btnExplorar.addEventListener("click", mostrarExplorar);
+
+	//Navegación favoritos
+	btnFavoritos.addEventListener("click", mostrarFavoritos);
 
 	//Acciones de las tarjetas de destino
 	destinarioContainer.addEventListener("click", (event) => {
@@ -94,6 +293,14 @@ function registrarEventos() {
 
 		if (accion === "detail") {
 			abrirDetalle(codigo);
+		}
+
+		if (accion === "favorite") {
+			manejarAgregarFavorito(codigo);
+		}
+
+		if (accion === "remove-favorite") {
+			manejarEliminarFavoritos(codigo);
 		}
 	});
 
@@ -145,6 +352,9 @@ async function init() {
 
 	//Mostrar los resultados iniciales
 	aplicarFiltros();
+
+	//Actualizar navegación
+	actualizarNavegacion();
 
 	//Registrar los eventos de busqueda
 	registrarEventos();
